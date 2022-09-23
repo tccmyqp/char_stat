@@ -14,13 +14,13 @@
 
 Файлы:
 
-    ch_stat_1.1.py       скрипт
+    ch_stat_*.py         скрипт
     text_ansi.txt        тестовый ansi файл
     text_utf8.txt        тестовый utf8 файл
     text_utf-bom.txt     тестовый ansi файл
     text_mac.txt         тестовый utf8 файл
     text_* техинфо.txt   пример результата
-    ch_stat_1.1.exe      приложение под Windows7
+    ch_stat_*.exe        приложение под Windows7
 
 Зависимости:
 
