@@ -7,8 +7,10 @@
 
 Поддержка форматов:
 
-    ansi
+    ansi (windows-1251)
     utf8
+    utf8-BOM
+    mac
 
 Файлы:
 
