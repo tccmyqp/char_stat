@@ -1,34 +1,23 @@
 #  coding: utf-8
-#from imp import reload
-#import sys
 import glob
-#import urllib.request
 import chardet
 from chardet.universaldetector import UniversalDetector
-#import string
-#import chardet
-
-#reload(sys)
-#print (sys.version)
 
 print('''Данная программа подсчитывает количество символов
 во всех текстовых файлах *.txt в текущей директории
 и сохраняет информацию в файл с именем "* техинфо.тхт"\n''')
 
-def write_step(st):
-	#print(st)
+def write_line(st):
 	file_out.write(st+'\n')
 	
 all_txt_files = glob.glob('*.txt')
 
 file_lst=[]
-print(len(all_txt_files))
 	
 for i in all_txt_files:
-	print(i)
-	if 'техинфо' not in i:
+	if 'техинфо' not in i and 'requirements.txt' not in i:
 		file_lst.append(i)
-print(file_lst)
+print('файлы для обработки: ', file_lst)
 
 #открываем файлы
 detector = UniversalDetector()
@@ -38,9 +27,7 @@ for filename in file_lst:
 	filename_write = filename_read[:-4]+' техинфо'+'.txt'
 	file_out = open(filename_write, 'w', encoding='utf-8')
 
-	#print(handle)
-
-	write_step('Имя файла: '+ filename_read)
+	write_line('Имя файла: '+ filename_read)
 
 	detector.reset()   	
 	for line in open(filename_read, 'rb'):
@@ -48,86 +35,86 @@ for filename in file_lst:
 	    if detector.done: break
 	detector.close()
 	enc = detector.result['encoding']
-	#print (enc)
 	
 	if enc!='utf-8':
 		with open(filename_read, 'r') as file_in:
 			#считаем строки
-			write_step('Cтрок: '+str(sum([1 for i in file_in.readlines() if i.strip()])))
+			write_line('Cтрок: '+str(sum([1 for i in file_in.readlines() if i.strip()])))
 			file_in.seek(0)#перемотка в начало файла
 			s = file_in.read()#читаем данные
 		file_in.close()
-		#print(s,'\n')
 	else:
 		with open(filename_read, 'r', encoding=enc) as file_in:
 			#считаем строки
-			write_step('Cтрок: '+str(sum([1 for i in file_in.readlines() if i.strip()])))
+			write_line('Cтрок: '+str(sum([1 for i in file_in.readlines() if i.strip()])))
 		file_in.close()
 		
 
 		with open(filename_read, 'rb') as file_in:
 			s = file_in.read()#читаем данные
 			s = s.decode(enc)
-		#print(s,'\n')
 		file_in.close()
 
-	#очистка текста
-	s=s.replace('\f','')#перевод страницы
-	s=s.replace('\n','')#новая строка
-	s=s.replace('\r','')#перевод каретки
-	s=s.replace('\v','')#вертикальная табуляция
-	s=s.replace('\t',' ')#горизонтальная табуляция
-
-	write_step('Заглавных букв: '+str(sum(1 for i in s if i.isupper())))
-
 	
+	# символы для удаления
+	ch_for_del = ['\f',		#перевод страницы
+				  '\n',		#новая строка
+				  '\r',		#перевод каретки
+				  '\v',		#вертикальная табуляция
+				  '\t'		#горизонтальная табуляция
+				]
+ 
+	#очистка текста
+	s_clear = ''.join([i for i in s if i not in ch_for_del])
+	s = s_clear
+ 
+	write_line('Заглавных букв: '+str(sum(1 for i in s if i.isupper())))
+
 	s=s.lower()
 
-	while "  " in s:#удаляем лишние пробелы
+	#удаляем дублирующие пробелы
+	while "  " in s:
 	    s= s.replace("  ", " ")
 
-	write_step('количество символов с пробелами: '+str(len(s)))
+	write_line('количество символов учитывая пробелы: '+str(len(s)))
 	
-	data=set(s)
-	d={}
+	# получаем список уникальных символов (множество)
+	uniq_chars=set(s)
+ 
+	d={} # словарь в формате {символ:количество,...}
 
+	# считаем кол-во каждого символа в тексте и общее количество, заполняем словарь d{}
 	total=0
-	for i in data:
+	for i in uniq_chars:
 	  d[i]=s.count(i)
 	  total+=s.count(i)
 
-	#write_step('Символов подсчитано:'+str(total))
+	write_line('\nСортировка по буквам:')
 
-	write_step('\nСортировка по буквам:')
-
-	list_keys = list(d.keys())
-	list_keys.sort()
-
+	list_keys = sorted(list(d.keys()))
+ 
+	descr = {' ':'пробелов: ', ',':'запятых: ', '.':'точек: '}
+ 
 	for i in list_keys:
-	  if i==' ':
-	    write_step('пробелов: '+ str(d[i]))
-	  elif i==',':
-	    write_step('запятых: '+ str(d[i]))
-	  elif i=='.':
-	    write_step('точек: '+ str(d[i]))
-	  else:
-	    write_step(i+' : '+ str(d[i]))
+		if i in descr: 
+			write_line(descr[i]+ str(d[i]))
+		else:
+			write_line(i+' : '+ str(d[i]))
 	 
-	write_step('\nСортировка по количеству:')
+	write_line('\nСортировка по количеству:')
 
 	list_d = list(d.items())
 	list_d.sort(key=lambda i: i[1], reverse=True)
 
 	for i in list_d:
 	  if i[0]==' ':
-	    write_step('пробелов: '+ str(i[1]))
+	    write_line('пробелов: '+ str(i[1]))
 	  elif i[0]==',':
-	    write_step('запятых: '+ str(i[1]))
+	    write_line('запятых: '+ str(i[1]))
 	  elif i[0]=='.':
-	    write_step('точек: '+ str(i[1]))
+	    write_line('точек: '+ str(i[1]))
 	  else:
-	    write_step(i[0]+': '+ str(i[1]))
+	    write_line(i[0]+': '+ str(i[1]))
 
 	file_out.write('конец')
-	print('\n')
 	file_out.close()
