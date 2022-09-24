@@ -24,7 +24,7 @@
 
 Зависимости:
 
-Для запуска приложения возможно потребуется установить vc_redist:
+Для запуска приложения возможно потребуется установить vc_redist 14.x:
 - [Список vc_redist на сайте Microsoft](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022/ "https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022/")
 - Прямая ссылка [vc_redist.x86_2015-2022](https://aka.ms/vs/17/release/vc_redist.x86.exe "https://aka.ms/vs/17/release/vc_redist.x86.exe")
 - Прямая ссылка [vc_redist.x64_2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe "https://aka.ms/vs/17/release/vc_redist.x64.exe")
