@@ -8,7 +8,7 @@ print('''Данная программа подсчитывает количес
 и сохраняет информацию в файл с именем "* техинфо.тхт"\n''')
 
 # записывает заданную строку в файл
-def write_line(out_filename, st):
+def write_line_to_file(out_filename, st):
     with open(out_filename, 'a', encoding='utf-8') as file_out:
         file_out.write(st+'\n')
 
@@ -24,43 +24,8 @@ def detect_charset(in_filename):
     detector.close()
     return detector.result['encoding']
 
-all_txt_files = glob.glob('*.txt')
-    
-# получаем имена файлов для обработки
-file_lst = [i for i in all_txt_files if 'техинфо' not in i and 'requirements.txt' not in i]
-        
-print('файлы для обработки: ', file_lst)
-
-# обрабатываем каждый файл
-for in_filename in file_lst:
-
-    # собираем имя выходного файла
-    out_filename = in_filename[:-4]+' техинфо'+'.txt' 
-
-    # создаем/очищаем выходной файл
-    with open(out_filename, 'w', encoding='utf-8') as f:
-        # пишем информацию в файл
-        f.write('Имя файла: ' + in_filename +'\n')
-    
-    # определяем кодировку входного файла
-    enc = detect_charset(in_filename)
-    print(in_filename, ',', enc)
-
-    # открываем файл в нужной кодировке и считываем данные
-    with open(in_filename, 'r', encoding=enc) as file_in:
-     
-        #считаем кол-во строк
-        lines_num = sum([1 for i in file_in.readlines() if i.strip()])
-        
-        #записываем данные в файл
-        write_line(out_filename, 'Cтрок: ' + str(lines_num))
-
-        #перемотка в начало файла
-        file_in.seek(0)
-
-        #считываем данные
-        s = file_in.read()
-  
+# очистка текста от непечатаемых символов
+def clear_non_print_chars(s):
     # символы для удаления
     ch_for_del=['\f',		#перевод страницы
                 '\n',		#новая строка
@@ -71,55 +36,107 @@ for in_filename in file_lst:
  
     # очистка текста
     s_clear = ''.join([i for i in s if i not in ch_for_del])
-    s = s_clear
+    return s_clear
+
+# запись информации по заданному символу в файл
+def write_char_data_to_file(out_filename, ch, count):
+    descr = {' ':'пробелов: ', ',':'запятых: ', '.':'точек: '}
+    if ch in descr: 
+        write_line_to_file(out_filename, descr[ch]+str(count))
+    else:
+        write_line_to_file(out_filename, ch+' : '+str(count))
+
+# получаем имена файлов для обработки
+def get_filenames_for_processing():
+    all_txt_files = glob.glob('*.txt')
+    filtered_filenames = [i for i in all_txt_files if 'техинфо' not in i and 'requirements.txt' not in i]
+    return filtered_filenames
+
+# считаем кол-во каждого символа в тексте и общее количество
+def get_chars_count(s):
+    # получаем список уникальных символов (множество)
+    uniq_chars=set(s)
+    
+    # словарь в формате chars_count{символ:количество,...}
+    chars_count={}
+    
+    total_chars=0
+    for i in uniq_chars:
+        chars_count[i]=s.count(i)
+        total_chars+=s.count(i)
+    return chars_count, total_chars
+
+filenames_for_processing = get_filenames_for_processing()   
+print('файлы для обработки: ', filenames_for_processing)
+
+# обрабатываем каждый файл
+for in_filename in filenames_for_processing:
+    
+    # собираем имя выходного файла
+    out_filename = in_filename[:-4]+' техинфо'+'.txt' 
+
+    # создаем/очищаем выходной файл
+    with open(out_filename, 'w', encoding='utf-8') as f:
+        # и записываем строку с именем входного файла в выходной файл
+        f.write('Имя файла: '+in_filename+'\n')
+        
+    # определяем кодировку входного файла
+    enc = detect_charset(in_filename)
+    print(in_filename, ',', enc)
+
+    # открываем файл в нужной кодировке
+    with open(in_filename, 'r', encoding=enc) as file_in:
+     
+        #считаем кол-во строк в файле
+        lines_num = sum([1 for i in file_in.readlines() if i.strip()])
+        
+        #записываем данные в файл
+        write_line_to_file(out_filename, 'Cтрок: '+str(lines_num))
+
+        #перемотка в начало файла
+        file_in.seek(0)
+
+        #считываем данные из файла для дальнейшей обработки
+        s = file_in.read()
+
+    # удаляем непечатаемые символы
+    s = clear_non_print_chars(s)
     
     # считаем количество заглавных букв
     upper_num = sum(1 for i in s if i.isupper())
-    write_line(out_filename, 'Заглавных букв: '+str(upper_num))
+    
+    #записываем данные в файл
+    write_line_to_file(out_filename, 'Заглавных букв: '+str(upper_num))
 
     # удаляем дублирующие пробелы
     while "  " in s:
         s= s.replace("  ", " ")
     
+    # считаем и записываем в файл кол-во символов
     s=s.lower()
-    write_line(out_filename, 'количество символов учитывая пробелы: '+str(len(s)))
+    write_line_to_file(out_filename, 'количество символов учитывая пробелы: '+str(len(s)))
     
-    # получаем список уникальных символов (множество)
-    uniq_chars=set(s)
- 
-    # словарь в формате {символ:количество,...}
-    chars_count={} 
-
-    # считаем кол-во каждого символа в тексте и общее количество, заполняем словарь d{}
-    total=0
-    for i in uniq_chars:
-        chars_count[i]=s.count(i)
-        total+=s.count(i)
-
     # записываем в файл информационную строку
-    write_line(out_filename, '\nСортировка по буквам:')
+    write_line_to_file(out_filename, '\nСортировка по буквам:')
 
-    list_keys = sorted(list(chars_count.keys()))
-
-    # запись информации по заданному символу в файл
-    def write_char_data(ch, d):
-        descr = {' ':'пробелов: ', ',':'запятых: ', '.':'точек: '}
-        if ch in descr: 
-            write_line(out_filename, descr[ch]+ str(d))
-        else:
-            write_line(out_filename, ch+' : '+ str(d))
+    # получаем словарь chars_count{символ:количество,...} и общее кол-во символов
+    chars_count, total_chars = get_chars_count(s)
+    sorted_uniq_chars = sorted(list(chars_count.keys()))
  
-    for i in list_keys:
-        write_char_data(i, chars_count[i])
+    # для каждого символа записываем данные в файл 
+    for current_char in sorted_uniq_chars:
+        write_char_data_to_file(out_filename, ch=current_char, count=chars_count[current_char])
     
     # запись информационной строки в файл
-    write_line(out_filename, '\nСортировка по количеству:')
+    write_line_to_file(out_filename, '\nСортировка по количеству:')
 
+    # получаем упорядоченный по кол-ву каждого символа список
     list_d = list(chars_count.items())
-    list_d.sort(key=lambda i: i[1], reverse=True)
+    list_d.sort(key=lambda i: i[1], reverse=True)# key - ключ для сортировки, i[1] - частота символа в тексте
 
+    # для каждого символа записываем данные в файл
     for i in list_d:
-        write_char_data(i[0], i[1])
+        write_char_data_to_file(out_filename, ch=i[0], count=i[1])
 
     # запись информационной строки в файл
-    write_line(out_filename,'конец')
+    write_line_to_file(out_filename,'конец')
