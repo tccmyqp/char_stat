@@ -119,7 +119,7 @@ for in_filename in filenames_for_processing:
     # записываем в файл информационную строку
     write_line_to_file(out_filename, '\nСортировка по буквам:')
 
-    # получаем словарь chars_count{символ:количество,...} и общее кол-во символов
+    # получаем словарь частотности chars_count{символ:количество,...} и общее кол-во символов
     chars_count, total_chars = get_chars_count(s)
     sorted_uniq_chars = sorted(list(chars_count.keys()))
  
@@ -130,7 +130,7 @@ for in_filename in filenames_for_processing:
     # запись информационной строки в файл
     write_line_to_file(out_filename, '\nСортировка по количеству:')
 
-    # получаем упорядоченный по кол-ву каждого символа список
+    # получаем список упорядоченный по частоте каждого символа
     list_d = list(chars_count.items())
     list_d.sort(key=lambda i: i[1], reverse=True)# key - ключ для сортировки, i[1] - частота символа в тексте
 
