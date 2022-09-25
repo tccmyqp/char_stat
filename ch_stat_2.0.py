@@ -48,23 +48,13 @@ def write_char_data_to_file(out_filename, ch, count):
 
 # получаем имена файлов для обработки
 def get_filenames_for_processing():
-    all_txt_files = glob.glob('*.txt')
-    filtered_filenames = [i for i in all_txt_files if 'техинфо' not in i and 'requirements.txt' not in i]
-    return filtered_filenames
-
-# считаем кол-во каждого символа в тексте и общее количество
-def get_chars_count(s):
-    # получаем список уникальных символов (множество)
-    uniq_chars=set(s)
+    file_names = glob.glob('*.txt')
+    block_txts = ['техинфо', 'requirements.txt']
     
-    # словарь в формате chars_count{символ:количество,...}
-    chars_count={}
+    for block_txt in block_txts:
+        file_names = list(filter(lambda filename: block_txt not in filename, file_names))
     
-    total_chars=0
-    for i in uniq_chars:
-        chars_count[i]=s.count(i)
-        total_chars+=s.count(i)
-    return chars_count, total_chars
+    return file_names
 
 filenames_for_processing = get_filenames_for_processing()   
 print('файлы для обработки: ', filenames_for_processing)
@@ -119,8 +109,9 @@ for in_filename in filenames_for_processing:
     # записываем в файл информационную строку
     write_line_to_file(out_filename, '\nСортировка по буквам:')
 
-    # получаем словарь частотности chars_count{символ:количество,...} и общее кол-во символов
-    chars_count, total_chars = get_chars_count(s)
+    # получаем словарь частотности chars_count{символ:количество,...}
+    chars_count={char:s.count(char) for char in set(s)}
+    
     sorted_uniq_chars = sorted(list(chars_count.keys()))
  
     # для каждого символа записываем данные в файл 
